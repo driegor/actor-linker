@@ -1,15 +1,17 @@
 package com.devgor.actor.linker.infrastructure
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.any
 import org.mockito.Mockito.anyList
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.springframework.ai.vectorstore.VectorStore
 import org.mockito.kotlin.whenever
 import org.springframework.ai.document.Document
-import kotlin.test.assertEquals
+import org.springframework.ai.vectorstore.SearchRequest
+import org.springframework.ai.vectorstore.VectorStore
 
 class ActorLinkerServiceTest {
 
@@ -19,7 +21,7 @@ class ActorLinkerServiceTest {
     @BeforeEach
     fun setUp() {
         vectorStore = mock()
-        actorLinkerService = ActorLinkerService()
+        actorLinkerService = ActorLinkerService(vectorStore)
     }
 
     @Test
@@ -33,9 +35,12 @@ class ActorLinkerServiceTest {
     @Test
     fun `should find similar actors`() {
         val actorName = "Leonardo DiCaprio"
-        val expectedActors = listOf("Tom Hardy", "Kate Winslet").map { Document(it) }
-        whenever(vectorStore.similaritySearch(actorName)).thenReturn(expectedActors)
+        val expectedList =
+            listOf("Tom Hardy", "Kate Winslet").map { Document("anyEmbeddingText", mapOf("actor" to it)) }
+        whenever(
+            vectorStore.similaritySearch(any(SearchRequest::class.java))
+        ).thenReturn(expectedList)
         val similarActors = actorLinkerService.findSimilarActors(actorName)
-        assertEquals(expectedActors, similarActors)
+        assertEquals(expectedList.map { it.metadata["actor"] }, similarActors)
     }
 }
