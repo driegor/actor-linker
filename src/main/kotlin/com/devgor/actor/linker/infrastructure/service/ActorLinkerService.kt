@@ -1,4 +1,4 @@
-package com.devgor.actor.linker.infrastructure
+package com.devgor.actor.linker.infrastructure.service
 
 import org.springframework.ai.document.Document
 import org.springframework.ai.vectorstore.SearchRequest
