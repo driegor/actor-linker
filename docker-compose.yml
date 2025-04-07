@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  postgres:
+    build: .
+    environment:
+      POSTGRES_USER: actor-linker
+      POSTGRES_PASSWORD: actor-linker
+      POSTGRES_DB: actor-linker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  ollama:
+    image: ollama/ollama:latest
+    ports: [ "11435:11434" ] # change the host port 11435
+    volumes:
+      - ollama_data:/root/.ollama
+    pull_policy: always
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  ollama_data:

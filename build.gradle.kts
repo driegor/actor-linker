@@ -22,13 +22,16 @@ extra["springAiVersion"] = "1.0.0-M6"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("org.springframework.ai:spring-ai-ollama-spring-boot-starter")
+	implementation("org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+	testImplementation("org.testcontainers:junit-jupiter:1.20.4")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
 }
 
 dependencyManagement {
@@ -46,3 +49,27 @@ kotlin {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+sourceSets {
+	create("integrationTest") {
+		kotlin.srcDir("src/integrationTest/kotlin")
+		resources.srcDir("src/integrationTest/resources")
+		compileClasspath += sourceSets["main"].output + configurations["testRuntimeClasspath"]
+		runtimeClasspath += output + compileClasspath
+	}
+}
+
+tasks.register<Test>("integrationTest") {
+	description = "Runs integration tests."
+	group = "verification"
+	testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+	classpath = sourceSets["integrationTest"].runtimeClasspath
+	shouldRunAfter("test")
+	useJUnitPlatform()
+}
+
+tasks.test {
+	useJUnitPlatform()
+}
+
+
